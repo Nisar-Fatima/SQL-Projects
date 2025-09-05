@@ -45,16 +45,10 @@ INSERT INTO binary_demo (bin_col) VALUES ('12345');
 INSERT INTO binary_demo (bin_col) VALUES ('abcdef');
 
 -- HEX and LENGTH BIN fuction
-SELECT bin_col, HEX(bin_col) ;
+-- SELECT bin_col, HEX(bin_col) ;
 SELECT bin_col, LENGTH(bin_col) ;
-SELECT BIN(bin_col) FROM binary_demo;
--- --------------case sensitivity in binary--------------------- 
-CREATE TABLE demo_ci_unique (
-    name VARCHAR(20) CHARACTER SET utf8 COLLATE utf8_general_ci UNIQUE
-);
+SELECT (bin_col) FROM binary_demo;
 
-INSERT INTO demo_ci_unique VALUES ('a');
-INSERT INTO demo_ci_unique VALUES ('A'); -- ⚠️ yaha error ayega
 -- ------------------------------------------------------
 
 CREATE TABLE varbinary_demo (
@@ -65,10 +59,87 @@ CREATE TABLE varbinary_demo (
 INSERT INTO varbinary_demo (token) VALUES ('hello');  
 
 -- 4. Retrieve data
-SELECT id, HEX(token) AS readable_token FROM varbinary_demo;
+SELECT 
+    id, 
+    token,                 -- original binary column
+    HEX(token) AS readable_token  -- hex readable form
+FROM varbinary_demo;
+
 
 CREATE TABLE wrong_default (
     key_value VARBINARY(64) DEFAULT 'hello'
 );
-describe wrong_default
+describe wrong_default;
+-- -----------------------------------------------------------------
+CREATE TABLE tinyblob_demo (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    icon TINYBLOB
+);
+
+-- Insert binary data (small string stored as binary)
+INSERT INTO tinyblob_demo (icon) VALUES ('abc');
+-- Retrieve in readable form
+SELECT id, HEX(icon) AS hex_value
+FROM tinyblob_demo;
+-- --------------------------------------------------------------------
+CREATE TABLE enum_demo (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    gender ENUM('male', 'female', 'other')
+);
+
+-- ✅ Valid inserts
+INSERT INTO enum_demo (gender) VALUES ('male');
+INSERT INTO enum_demo (gender) VALUES ('female');
+
+-- ❌ Invalid insert
+INSERT INTO enum_demo (gender) VALUES ('unknown');
+-- Stores '' (empty string) and raises a warning
+
+-- Retrieve
+SELECT id, gender FROM enum_demo;
+-- ------------------------------------------------------------
+CREATE TABLE default_enum (
+    role ENUM('admin','user','guest','') DEFAULT 'user'
+);
+INSERT INTO default_enum (role) VALUES (''); -- insert without role
+-- ---------------------------------------------------------
+CREATE TABLE user_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50),
+    hobbies SET('reading','sports','music','travel','gaming')
+);
+DROP TABLE IF EXISTS user_profiles;
+CREATE TABLE user_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50),
+    hobbies SET('reading','sports','music','travel','gaming')
+);
+describe user_profiles;
+INSERT INTO user_profiles (name, hobbies)
+VALUES ('Ali', 'reading');
+INSERT INTO user_profiles (name, hobbies)
+VALUES ('Sara', 'reading,music');
+INSERT INTO user_profiles (name, hobbies)
+VALUES ('Ahmed', '');
+SELECT id, name, hobbies FROM user_profiles;
+INSERT INTO user_profiles (name, hobbies)
+VALUES ('Zara', 'dancing');
+INSERT INTO user_profiles (name, hobbies)
+VALUES ('Usman', 'reading,reading');
+INSERT INTO user_profiles (name, hobbies)
+VALUES ('Nida', 'Reading');
+INSERT INTO user_profiles (name, hobbies)
+VALUES ('Hina', 'reading,dancing');
+INSERT INTO user_profiles (name, hobbies)
+VALUES ('Nida', 'READING');
+
+
+CREATE TABLE demo_set_bin (
+  hobbies SET('reading','music','sports') CHARACTER SET utf8 COLLATE utf8_bin
+);
+
+INSERT INTO demo_set_bin VALUES ('READING');
+INSERT INTO demo_set_bin VALUES ('reading');
+
+SELECT * FROM demo_set_bin 
 
